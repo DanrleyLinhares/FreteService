@@ -1,1 +1,1 @@
-web: gunicorn <fretecalculo>.wsgi
+web: gunicorn fretecalculo.wsgi:application
