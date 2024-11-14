@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Frete</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGiBjDqNIkqx5bqv3wlqPO2wcIQ2wZqN0&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 40px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: box-shadow 0.3s ease;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.6); /* Sombra de foco para indicar interatividade */
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .buttonbottom {
+            margin-top: 10px;
+        }
+        button[type="button"] {
+            background-color: #007bff;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: translateY(2px); /* Diminui a elevação quando o botão é clicado */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra reduzida ao clicar */
+        }
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px);
+        }
+        .modulo-select {
+            margin-bottom: 20px;
+        }
+        /* Aumentando a largura do seletor */
+        #modulo {
+            width: 100%; /* Aumenta a largura para ocupar 100% do espaço */
+            padding: 10px; /* Adiciona padding */
+            font-size: 16px; /* Ajusta o tamanho da fonte */
+        }
+        .draggable {
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        @media screen and (max-width: 768px) {
+            button {
+                font-size: 14px; /* Reduz o tamanho da fonte em telas menores */
+            }
+            input[type="text"] {
+                font-size: 14px; /* Ajusta o tamanho da fonte dos inputs */
+            }
+            .draggable {
+                flex-direction: column; /* Torna os inputs e botões empilhados ao invés de lado a lado */
+                align-items: stretch; /* Garante que os elementos se estiquem para preencher o espaço */
+            }
+            .remove-btn {
+                margin-left: 0; /* Remove a margem à esquerda do botão "remover" em telas pequenas */
+                margin-top: 10px; /* Dá um pequeno espaçamento entre os inputs e os botões */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Frete Service Express</h1>
+
+        <!-- Exibir a mensagem de erro aqui -->
+        {% if erro %}
+          <div class="alert alert-danger">{{ erro }}</div>
+        {% endif %}
+
+        <form action="/" method="POST">
+            {% csrf_token %}  <!-- Adiciona o token CSRF aqui -->
+            <div class="modulo-select">
+                <label for="modulo">Escolha o veículo para entrega:</label>
+                <select name="modulo" id="modulo">
+                    <option value="MOTO"><b>MOTO</b></option>
+                    <option value="CARRO"><b>CARRO</b></option>
+                </select>
+            </div>
+
+            <div id="enderecos">
+                <label for="enderecos">Digite o(s) Endereço(s):</label>
+                <div class="draggable">
+                    <input type="text" name="enderecos[]" id="endereco1" placeholder="Endereço 1">
+                    <button type="button" class="remove-btn" onclick="removerEndereco(this)">Remover</button>
+                </div>
+            </div>
+
+            <button type="button" class="buttonbottom" onclick="adicionarEndereco()">Adicionar Endereço</button>
+            <button type="submit" class="buttonbottom">Calcular</button>
+        </form>
+    </div>
+
+    <script>
+        function initAutocomplete(inputId) {
+            var input = document.getElementById(inputId);
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    alert("O endereço inserido não foi encontrado. Por favor, insira um endereço válido.");
+                    input.value = '';
+                }
+            });
+        }
+
+        function initDraggable() {
+            var container = document.getElementById('enderecos');
+            new Sortable(container, {
+                animation: 150,
+                handle: '.draggable',
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    // Logica após arrastar um endereço
+                }
+            });
+        }
+
+        // Inicializa autocomplete e arrastar para o primeiro endereço
+        initAutocomplete('endereco1');
+        initDraggable();
+
+        var contadorEnderecos = 1;
+
+        function adicionarEndereco() {
+            contadorEnderecos++;
+            var div = document.createElement("div");
+            div.className = 'draggable';
+            div.innerHTML = '<input type="text" name="enderecos[]" id="endereco' + contadorEnderecos + '" placeholder="Outro Endereço"><button type="button" class="remove-btn" onclick="removerEndereco(this)">Remover</button>';
+            document.getElementById("enderecos").appendChild(div);
+
+            initAutocomplete('endereco' + contadorEnderecos);
+            initDraggable();  // Atualiza o arrastar para os novos endereços
+        }
+
+        function removerEndereco(botao) {
+            botao.parentElement.remove();
+        }
+    </script>
+</body>
+</html>

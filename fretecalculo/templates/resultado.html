@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado do Cálculo de Frete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .resultado {
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .resultado p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        h2 {
+            margin-top: 20px;
+            font-size: 22px;
+            color: #2c3e50;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .botao {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .botao a {
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        .botao a:hover {
+            background-color: #2980b9;
+            transform: translateY(-5px);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .botao a:active {
+            transform: translateY(2px); /* Diminui a elevação quando clicar */
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* Sombra reduzida quando o botão é pressionado */
+        }
+        
+        .observacao {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @media screen and (max-width: 768px) {
+            .botao {
+                flex-direction: column; /* Empilha os botões verticalmente */
+                gap: 10px; /* Adiciona espaçamento entre os botões */
+                align-items: center; /* Alinha os botões no centro */
+            }
+            .botao a {
+                width: 100%; /* Faz os botões ocuparem toda a largura disponível */
+                max-width: 250px; /* Limita a largura dos botões */
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .resultado p {
+                font-size: 16px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+            .observacao {
+                font-size: 12px;
+            }
+            .container {
+                padding: 15px;
+                max-width: 100%;
+                border-radius: 10px;
+            }
+        }
+    </style>
+    <script>
+        function imprimirResultado() {
+            window.print();
+        }
+
+        function compartilharResultado() {
+            const resultado = document.querySelector('.resultado').innerText;
+            const textoParaCompartilhar = `Resultado do Cálculo de Frete:\n\n${resultado}`;
+            navigator.clipboard.writeText(textoParaCompartilhar).then(() => {
+                alert('Resultado copiado para a área de transferência! Você pode colá-lo onde desejar.');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Resultado do Cálculo de Frete</h1>
+        <div class="resultado">
+            <p><strong>Veículo de entrega:</strong> {{ veiculo }}</p>
+            <p><strong>Custo Total:</strong> {{ custo_total }}</p>
+            <p><strong>Distância Total:</strong> {{ total_km }} km</p>
+
+            <h2>Detalhes das Distâncias:</h2>
+            <ul>
+                {% for distancia in distancias %}
+                    <li><strong>De:</strong> {{ distancia.origem }} <br><strong>Para:</strong> {{ distancia.destino }}<br><strong>Distância:</strong> {{ distancia.distancia }} km</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="botao">
+            <a href="/" class="botao">Novo Cálculo</a>
+            <a href="javascript:void(0);" onclick="imprimirResultado()" class="botao">Imprimir</a>
+            <a href="javascript:void(0);" onclick="compartilharResultado()" class="botao">Compartilhar</a>
+        </div>
+
+        <div class="observacao">
+            <p><strong>Observação:</strong> Os valores podem sofrer alterações devido a fatores como tempo de espera e volume excessivo de mercadorias.</p>
+        </div>
+    </div>
+</body>
+</html>
