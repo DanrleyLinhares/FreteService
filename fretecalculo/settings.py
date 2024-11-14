@@ -15,7 +15,7 @@ DEBUG = True  # Mude para False em produção
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['freteservice.herokuapp.com', 'freteservice.com.br', 'www.freteservice.com.br']
+ALLOWED_HOSTS = ['freteservice-3f9adaef5ab7.herokuapp.com', 'freteservice.com.br', 'www.freteservice.com.br']
 
 # Application definition
 INSTALLED_APPS = [
