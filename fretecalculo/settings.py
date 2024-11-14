@@ -11,7 +11,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '=7#q@a3f*#kvh0qwge7_^#$2*8#2^-9jug!kwk9jg8&ryw_81j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Mude para False em produção
+DEBUG = False  # Mude para False em produção
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 

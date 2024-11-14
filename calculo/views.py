@@ -4,7 +4,7 @@ from django.http import JsonResponse
 import requests
 import os
 
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+#locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 SEDE = "Rua dos Guajajaras, 1470 - Barro Preto, Belo Horizonte - MG, Brasil"
 API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "AIzaSyAGiBjDqNIkqx5bqv3wlqPO2wcIQ2wZqN0")
 BASE_URL = "https://maps.googleapis.com/maps/api/distancematrix/json"
