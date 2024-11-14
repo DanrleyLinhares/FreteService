@@ -4,7 +4,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -16,7 +15,7 @@ DEBUG = True  # Mude para False em produção
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'herokuapp.com', 'freteservice.com.br', 'www.freteservice.com.br']
+ALLOWED_HOSTS = ['freteservice.herokuapp.com', 'freteservice.com.br', 'www.freteservice.com.br']
 
 # Application definition
 INSTALLED_APPS = [
