@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import requests
 import os
+import json
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 SEDE = "Rua dos Guajajaras, 1470 - Barro Preto, Belo Horizonte - MG, Brasil"
@@ -24,9 +25,16 @@ def fetch_distance(origin, destination):
         print(f"Erro ao buscar distância: {e}")
     return None
 
+def verificar_cidade(endereco):
+    if isinstance(endereco, str):
+        return "belo horizonte" in endereco.lower()
+    return False
+
+
 def calcular_distancias(enderecos):
     distancias = []
     total_km = 0
+    entregas_bh = 0
     deslocamento_sede = fetch_distance(SEDE, enderecos[0])
     
     if deslocamento_sede is None:
@@ -39,6 +47,9 @@ def calcular_distancias(enderecos):
         "distancia": format_distance(deslocamento_sede)
     })
 
+    if verificar_cidade(enderecos[0]):
+        entregas_bh += 1
+
     for i in range(1, len(enderecos)):
         distancia = fetch_distance(enderecos[i - 1], enderecos[i])
         if distancia is None:
@@ -49,6 +60,8 @@ def calcular_distancias(enderecos):
             "destino": enderecos[i],
             "distancia": format_distance(distancia)
         })
+        if verificar_cidade(enderecos[i]):
+            entregas_bh += 1
 
     # Ajuste para a sede e segundo endereço
     if len(enderecos) > 1:
@@ -56,19 +69,24 @@ def calcular_distancias(enderecos):
         if distancia_segundo and (distancia_segundo < 3.6 or deslocamento_sede < 3.6):
             total_km -= deslocamento_sede
 
-    return total_km, distancias
+    return total_km, distancias, entregas_bh  
 
 def format_distance(km):
     return "{:.1f}".format(km).replace(',', '.')
 
-def calcular_custo(modulo, total_km, num_enderecos):
+def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos):
+    fora_bh = any(not verificar_cidade(endereco) for endereco in enderecos)
     if modulo == "MOTO":
-        custo = 18.00 + total_km * 1.30
-        if num_enderecos > 2:
-            extra_cost = 10.00 if 1 < total_km <= 18 else 20.00
-            custo += (num_enderecos - 2) * extra_cost
-        if total_km > 100:
-            custo *= 2
+        if total_km <= 2:
+            custo = 18.00  # Até 2 km
+        elif 2 < total_km <= 10:
+            custo = 18.00 + total_km * 1.20  # De 2 km até 10 km
+        else:
+            # Acima de 10 km
+            if fora_bh:
+                custo = 18.00 + total_km * 1.50  # Fora de Belo Horizonte
+            else:
+                custo = 18.00 + total_km * 1.35  # Dentro de Belo Horizonte
     elif modulo == "CARRO":
         custo = 80.00
         if total_km > 8:
@@ -85,11 +103,11 @@ def calculo(request):
         veiculo = request.POST.get('modulo', 'Não especificado')
 
         if enderecos:
-            total_km, distancias = calcular_distancias(enderecos)
+            total_km, distancias, entregas_bh = calcular_distancias(enderecos)
             if total_km is None:
                 return render(request, "calculo.html", {"erro": distancias})
             
-            custo_total = calcular_custo(modulo, total_km, len(enderecos))
+            custo_total = calcular_custo(modulo, total_km, len(enderecos), entregas_bh, enderecos)
             distancias_formatadas = [d for i, d in enumerate(distancias) if i != 0]
             total_km_formatada = format_distance(total_km)
 
@@ -97,6 +115,7 @@ def calculo(request):
                 'veiculo': veiculo,
                 "custo_total": custo_total,
                 "total_km": total_km_formatada,
-                "distancias": distancias_formatadas
+                "distancias": distancias_formatadas,
+                "entregas_bh": entregas_bh
             })
     return render(request, "calculo.html")

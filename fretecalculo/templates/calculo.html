@@ -159,7 +159,13 @@
                 if (!place.geometry) {
                     alert("O endereço inserido não foi encontrado. Por favor, insira um endereço válido.");
                     input.value = '';
-                }
+                } else {
+            // O endereço completo está em place.formatted_address
+            var endereco = place.formatted_address;
+            console.log("Endereço selecionado:", endereco);
+
+            // Aqui você pode fazer algo como enviar o endereço para o backend, ou armazená-lo para o envio
+        }
             });
         }
 
