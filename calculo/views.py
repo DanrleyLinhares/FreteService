@@ -41,6 +41,8 @@ def calcular_distancias(enderecos):
         return None, "Erro ao calcular a distância para o primeiro endereço."
     
     total_km += deslocamento_sede
+
+    print(f"Distância Sede -> Primeiro Endereço: {deslocamento_sede} km")
     distancias.append({
         "origem": SEDE,
         "destino": enderecos[0],
@@ -55,6 +57,7 @@ def calcular_distancias(enderecos):
         if distancia is None:
             return None, f"Erro ao calcular a distância para o endereço {i}"
         total_km += distancia
+        print(f"Distância Endereço {i-1} -> Endereço {i}: {distancia} km")
         distancias.append({
             "origem": enderecos[i - 1],
             "destino": enderecos[i],
@@ -62,23 +65,6 @@ def calcular_distancias(enderecos):
         })
         if verificar_cidade(enderecos[i]):
             entregas_bh += 1
-
-    # Ajuste para a sede e primeiro endereço
-    if len(enderecos) > 1:
-        ultimo_endereco = enderecos[-1]
-        distancia_ultimo = fetch_distance(SEDE, ultimo_endereco)
-        distancia_primeiro = fetch_distance(SEDE, enderecos[0])
-
-        if distancia_ultimo and distancia_ultimo < 3.6:  # Último endereço perto da sede
-            if distancia_primeiro and distancia_primeiro < 10.9:
-                # Não cobra o valor da sede até o primeiro endereço
-                pass  # Não faz nada, não adiciona distância
-            elif distancia_primeiro and distancia_primeiro > 10.9:
-                # Cobra metade da distância da sede até o primeiro endereço
-                total_km -= (distancia_primeiro / 2)
-        else:
-            # Não ajusta a distância se o último endereço estiver distante
-            total_km += distancia_primeiro
 
     return total_km, distancias, entregas_bh  
 
@@ -98,6 +84,11 @@ def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volu
                 custo = 18.00 + total_km * 1.45  # Fora de Belo Horizonte
             else:
                 custo = 18.00 + total_km * 1.25  # Dentro de Belo Horizonte
+        # Ajuste para a sede até o primeiro endereço
+        distancia_primeiro = fetch_distance(SEDE, enderecos[0])
+        if distancia_primeiro and distancia_primeiro > 10.9:
+            custo -= (distancia_primeiro / 2) * 1.35  # Cobra metade do valor do custo para dentro de BH
+
         if volume: #Adiciona 10 reais caso tenha Volume
             custo += 10.00
         if num_enderecos > 2:
