@@ -118,8 +118,6 @@ def calculo(request):
          # Se o campo tempo_parado estiver vazio, define como 0
         if not tempo_parado:
             tempo_parado = 0
-        tempo_parado = int(tempo_parado) if tempo_parado > 0 else 0
-
 
         # Verifica se o volume foi selecionado (obrigatório)
         if volume is None:
