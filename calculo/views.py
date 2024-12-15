@@ -22,8 +22,7 @@ def fetch_distance(origin, destination):
         if data['status'] == 'OK' and 'distance' in data['rows'][0]['elements'][0]:
             return data['rows'][0]['elements'][0]['distance']['value'] / 1000  # Em quilômetros
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao buscar distância: {e}")
-    return None
+        return None
 
 def verificar_cidade(endereco):
     if isinstance(endereco, str):
@@ -42,7 +41,6 @@ def calcular_distancias(enderecos):
     
     total_km += deslocamento_sede
 
-    print(f"Distância Sede -> Primeiro Endereço: {deslocamento_sede} km")
     distancias.append({
         "origem": SEDE,
         "destino": enderecos[0],
@@ -57,7 +55,6 @@ def calcular_distancias(enderecos):
         if distancia is None:
             return None, f"Erro ao calcular a distância para o endereço {i}"
         total_km += distancia
-        print(f"Distância Endereço {i-1} -> Endereço {i}: {distancia} km")
         distancias.append({
             "origem": enderecos[i - 1],
             "destino": enderecos[i],
@@ -84,10 +81,17 @@ def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volu
                 custo = 18.00 + total_km * 1.45  # Fora de Belo Horizonte
             else:
                 custo = 18.00 + total_km * 1.25  # Dentro de Belo Horizonte
-        # Ajuste para a sede até o primeiro endereço
+        # Ajuste para o deslocamento da sede até o primeiro endereço
         distancia_primeiro = fetch_distance(SEDE, enderecos[0])
-        if distancia_primeiro and distancia_primeiro > 10.9:
-            custo -= (distancia_primeiro / 2) * 1.35  # Cobra metade do valor do custo para dentro de BH
+        distancia_ultimo = fetch_distance(SEDE, enderecos[-1])
+
+        if distancia_primeiro and distancia_primeiro > 10.9 and distancia_ultimo and distancia_ultimo < 3.6:
+            # Se o primeiro endereço for maior que 10.9 km e o último for menor que 3.6 km
+            custo -= (distancia_primeiro / 2) * 1.45  # Aplica o desconto de 50% para o primeiro endereço
+
+        elif distancia_ultimo and distancia_ultimo < 3.6 and distancia_primeiro and distancia_primeiro < 10.9:
+            # Se o último endereço for menor que 3.6 km e o primeiro endereço também for menor que 10.9 km
+            custo -= distancia_primeiro * 1.45  # Não cobra o deslocamento para o primeiro endereço
 
         if volume: #Adiciona 10 reais caso tenha Volume
             custo += 10.00
