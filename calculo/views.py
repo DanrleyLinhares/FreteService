@@ -95,9 +95,9 @@ def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volu
         else:
             # Acima de 10 km
             if fora_bh:
-                custo = 18.00 + total_km * 1.65  # Fora de Belo Horizonte
+                custo = 18.00 + total_km * 1.45  # Fora de Belo Horizonte
             else:
-                custo = 18.00 + total_km * 1.35  # Dentro de Belo Horizonte
+                custo = 18.00 + total_km * 1.25  # Dentro de Belo Horizonte
         if volume: #Adiciona 10 reais caso tenha Volume
             custo += 10.00
         if num_enderecos > 2:
