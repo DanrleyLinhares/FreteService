@@ -74,7 +74,7 @@ def calcular_distancias(enderecos):
 def format_distance(km):
     return "{:.1f}".format(km).replace(',', '.')
 
-def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos):
+def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volume=False, tempo_parado=0):
     fora_bh = any(not verificar_cidade(endereco) for endereco in enderecos)
     if modulo == "MOTO":
         if total_km <= 2:
@@ -87,12 +87,24 @@ def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos):
                 custo = 18.00 + total_km * 1.65  # Fora de Belo Horizonte
             else:
                 custo = 18.00 + total_km * 1.35  # Dentro de Belo Horizonte
+        if volume: #Adiciona 10 reais caso tenha Volume
+            custo += 10.00
+        if num_enderecos > 2:
+            custo_adicional = (num_enderecos - 2) * 10  # 10 reais por endereço após o segundo
+            custo += custo_adicional
+            
     elif modulo == "CARRO":
         custo = 80.00
         if total_km > 8:
-            custo += (total_km - 8) * 2.60
+            custo += (total_km - 8) * 2.90
         if total_km > 90:
-            custo *= 2
+            custo *= 2.20
+
+    # Calcular o custo do tempo parado (se houver)
+    if tempo_parado > 0:
+        custo_tempo_parado = (tempo_parado / 60) * 25.00  # R$ 25 por hora, fração proporcional
+        custo += custo_tempo_parado
+
     custo_formatado = locale.currency(custo, grouping=True, symbol=True)
     return custo_formatado
     
@@ -100,14 +112,36 @@ def calculo(request):
     if request.method == "POST":
         modulo = request.POST.get("modulo")
         enderecos = request.POST.getlist("enderecos[]")
+        volume = request.POST.get("volume")
+        tempo_parado = request.POST.get("tempo_parado", 0)  # Captura o tempo parado (em minutos)
+
+         # Se o campo tempo_parado estiver vazio, define como 0
+        if not tempo_parado:
+            tempo_parado = 0
+        tempo_parado = int(tempo_parado) if tempo_parado > 0 else 0
+
+
+        # Verifica se o volume foi selecionado (obrigatório)
+        if volume is None:
+            return render(request, "calculo.html", {"erro": "Por favor, selecione se o volume está presente ou não."})
+        
+        # Converte o campo volume para booleano
+        volume = volume == "on"
         veiculo = request.POST.get('modulo', 'Não especificado')
+
+        # Verifica se o modulo e endereços foram preenchidos
+        if not modulo:
+            return render(request, "calculo.html", {"erro": "Por favor, selecione um tipo de veículo."})
+        if not enderecos:
+            return render(request, "calculo.html", {"erro": "Por favor, insira ao menos um endereço."})
 
         if enderecos:
             total_km, distancias, entregas_bh = calcular_distancias(enderecos)
             if total_km is None:
                 return render(request, "calculo.html", {"erro": distancias})
             
-            custo_total = calcular_custo(modulo, total_km, len(enderecos), entregas_bh, enderecos)
+            custo_total = calcular_custo(modulo, total_km, len(enderecos), entregas_bh, enderecos, volume=volume, tempo_parado=int(tempo_parado))
+
             distancias_formatadas = [d for i, d in enumerate(distancias) if i != 0]
             total_km_formatada = format_distance(total_km)
 
@@ -116,6 +150,8 @@ def calculo(request):
                 "custo_total": custo_total,
                 "total_km": total_km_formatada,
                 "distancias": distancias_formatadas,
-                "entregas_bh": entregas_bh
+                "entregas_bh": entregas_bh,
+                "volume": "Sim" if volume else "Não",
+                "tempo_parado": tempo_parado
             })
     return render(request, "calculo.html")
