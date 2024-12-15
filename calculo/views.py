@@ -63,11 +63,22 @@ def calcular_distancias(enderecos):
         if verificar_cidade(enderecos[i]):
             entregas_bh += 1
 
-    # Ajuste para a sede e segundo endereço
+    # Ajuste para a sede e primeiro endereço
     if len(enderecos) > 1:
-        distancia_segundo = fetch_distance(SEDE, enderecos[1])
-        if distancia_segundo and (distancia_segundo < 3.6 or deslocamento_sede < 3.6):
-            total_km -= deslocamento_sede
+        ultimo_endereco = enderecos[-1]
+        distancia_ultimo = fetch_distance(SEDE, ultimo_endereco)
+        distancia_primeiro = fetch_distance(SEDE, enderecos[0])
+
+        if distancia_ultimo and distancia_ultimo < 3.6:  # Último endereço perto da sede
+            if distancia_primeiro and distancia_primeiro < 10.9:
+                # Não cobra o valor da sede até o primeiro endereço
+                pass  # Não faz nada, não adiciona distância
+            elif distancia_primeiro and distancia_primeiro > 10.9:
+                # Cobra metade da distância da sede até o primeiro endereço
+                total_km -= (distancia_primeiro / 2)
+        else:
+            # Não ajusta a distância se o último endereço estiver distante
+            total_km += distancia_primeiro
 
     return total_km, distancias, entregas_bh  
 
