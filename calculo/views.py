@@ -68,7 +68,6 @@ def calcular_distancias(enderecos):
 def format_distance(km):
     return "{:.1f}".format(km).replace(',', '.')
 
-import locale
 
 def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volume=False, tempo_parado=0):
     fora_bh = any(not verificar_cidade(endereco) for endereco in enderecos)
