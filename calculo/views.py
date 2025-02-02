@@ -68,19 +68,24 @@ def calcular_distancias(enderecos):
 def format_distance(km):
     return "{:.1f}".format(km).replace(',', '.')
 
+import locale
+
 def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volume=False, tempo_parado=0):
     fora_bh = any(not verificar_cidade(endereco) for endereco in enderecos)
+    
+    # Cálculo para Moto
     if modulo == "MOTO":
         if total_km <= 2:
             custo = 18.00  # Até 2 km
         elif 2 < total_km <= 10:
-            custo = 18.00 + total_km * 1.20  # De 2 km até 10 km
+            custo = 18.00 + total_km * 1.30  # De 2 km até 10 km
         else:
             # Acima de 10 km
             if fora_bh:
-                custo = 18.00 + total_km * 1.45  # Fora de Belo Horizonte
+                custo = 18.00 + total_km * 1.60  # Fora de Belo Horizonte
             else:
-                custo = 18.00 + total_km * 1.25  # Dentro de Belo Horizonte
+                custo = 18.00 + total_km * 1.40  # Dentro de Belo Horizonte
+
         # Ajuste para o deslocamento da sede até o primeiro endereço
         distancia_primeiro = fetch_distance(SEDE, enderecos[0])
         distancia_ultimo = fetch_distance(SEDE, enderecos[-1])
@@ -93,26 +98,43 @@ def calcular_custo(modulo, total_km, num_enderecos, entregas_bh, enderecos, volu
             # Se o último endereço for menor que 3.6 km e o primeiro endereço também for menor que 10.9 km
             custo -= distancia_primeiro * 1.45  # Não cobra o deslocamento para o primeiro endereço
 
-        if volume: #Adiciona 10 reais caso tenha Volume
+        if tempo_parado > 0:
+            custo_tempo_parado = (tempo_parado / 60) * 25.00  # R$ 25 por hora, fração proporcional
+            custo += custo_tempo_parado
+
+        if volume:  # Adiciona 10 reais caso tenha Volume
             custo += 10.00
         if num_enderecos > 2:
-            custo_adicional = (num_enderecos - 2) * 10  # 10 reais por endereço após o segundo
+            custo_adicional = (num_enderecos - 2) * 15  # 15 reais por endereço após o segundo
             custo += custo_adicional
-            
+
+    # Cálculo para Carro
     elif modulo == "CARRO":
-        custo = 80.00
-        if total_km > 8:
-            custo += (total_km - 8) * 2.90
-        if total_km > 90:
-            custo *= 2.20
+        if total_km <= 25:
+            custo = 90.00
+        elif total_km <= 30:
+            custo = 100.00
+        else:
+            custo = 100.00 + (total_km - 30) * 2.90
 
-    # Calcular o custo do tempo parado (se houver)
-    if tempo_parado > 0:
-        custo_tempo_parado = (tempo_parado / 60) * 25.00  # R$ 25 por hora, fração proporcional
-        custo += custo_tempo_parado
+        # Adicionar o custo adicional por pontos (a partir de 3 pontos)
+        if num_enderecos > 2:  # Começa a cobrar a partir de 3 endereços
+            pontos_adicionais = num_enderecos - 2
+            custo += pontos_adicionais * 30  # R$ 30 por ponto adicional
 
+        # Adicionar o custo de volume
+        if volume:
+            custo += 40.00
+
+        # Calcular o custo do tempo parado (se houver)
+        if tempo_parado > 0:
+            custo_tempo_parado = (tempo_parado / 60) * 50.00  # R$ 50 por hora, fração proporcional
+            custo += custo_tempo_parado
+
+    # Formatar o custo para exibição
     custo_formatado = locale.currency(custo, grouping=True, symbol=True)
     return custo_formatado
+
     
 def calculo(request):
     if request.method == "POST":
