@@ -8,7 +8,7 @@ import json
 import locale
 
 try:
-    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')  # Tenta configurar a localidade
+    locale.setlocale(locale.LC_ALL, '')  # Tenta configurar a localidade
 except locale.Error:
     locale.setlocale(locale.LC_ALL, '')  # Usa a localidade padrão do sistema
 
