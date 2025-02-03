@@ -13,6 +13,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '=7#q@a3f*#kvh0qwge7_^#$2*8#2^-9jug!
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False  # Mude para False em produção
 
+DEBUG = True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

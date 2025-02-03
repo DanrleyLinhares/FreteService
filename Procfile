@@ -1,1 +1,1 @@
-web: gunicorn fretecalculo.wsgi:application
+gunicorn --log-level debug fretecalculo.wsgi:application
