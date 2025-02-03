@@ -8,7 +8,7 @@ import json
 import locale
 
 try:
-    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')  # Tenta configurar a localidade
+    locale.setlocale(locale.LC_ALL, '')  # Tenta configurar a localidade
 except locale.Error:
     locale.setlocale(locale.LC_ALL, '')  # Usa a localidade padrão do sistema
 
@@ -153,7 +153,7 @@ def calculo(request):
             tempo_parado = 0
 
         # Verifica se o volume foi selecionado (obrigatório)
-        if volume is None:
+        if volume not in ["on", "off"]:
             return render(request, "calculo.html", {"erro": "Por favor, selecione se o volume está presente ou não."})
         
         # Converte o campo volume para booleano
