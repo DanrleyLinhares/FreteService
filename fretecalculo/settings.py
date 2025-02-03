@@ -35,7 +35,8 @@ LOGGING = {
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['freteservice.onrender.com', 'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
+# ALLOWED_HOSTS = ['freteservice.onrender.com', 'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['freteservice.onrender.com']
 
 # Application definition
 INSTALLED_APPS = [
