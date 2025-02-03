@@ -15,7 +15,7 @@ DEBUG = False  # Mude para False em produção
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['freteservice.onrender.com', 'https://freteservice.onrender.com/' ,'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['freteservice.onrender.com', 'frete-service.vercel.app', 'frete-service-9oa9vworu-danrley-linhares-batistas-projects.vercel.app' ,'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://freteservice.onrender.com']
 
 # Application definition
