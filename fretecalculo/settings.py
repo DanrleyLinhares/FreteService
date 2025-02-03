@@ -11,34 +11,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '=7#q@a3f*#kvh0qwge7_^#$2*8#2^-9jug!kwk9jg8&ryw_81j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False  # Mude para False em produção
-
-DEBUG = True
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django_error.log'),
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
-
+DEBUG = False  # Mude para False em produção
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS = ['freteservice.onrender.com', 'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
-ALLOWED_HOSTS = ['freteservice.onrender.com']
+ALLOWED_HOSTS = ['freteservice.onrender.com', 'freteservice.com.br', 'www.freteservice.com.br','127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
